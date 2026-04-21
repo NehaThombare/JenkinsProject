@@ -1,0 +1,18 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hello-python-app
+spec:
+  replicas: 2 # This tells K8s to always keep 2 copies running
+  selector:
+    matchLabels:
+      app: hello-python
+  template:
+    metadata:
+      labels:
+        app: hello-python
+    spec:
+      containers:
+      - name: hello-python
+        image: python:3.9-slim
+        command: ["python", "-c", "print('Hello from Kubernetes!'); import time; time.sleep(3600)"]

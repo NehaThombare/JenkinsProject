@@ -1,16 +1,22 @@
 pipeline {
-    agent {
-        docker { image 'python:3.9-slim' } 
+    agent any
+    environment {
+        DOCKER_USER = "your-dockerhub-username" // Replace this
+        APP_NAME = "hello-python-app"
     }
     stages {
-        stage('Build') {
+        stage('Build & Push') {
             steps {
-                echo 'Preparing the environment...'
-            }
-        }
-        stage('Run Script') {
-            steps {
-                sh 'python hello.py'
+                script {
+                    // Build the custom image
+                    sh "docker build -t ${DOCKER_USER}/${APP_NAME}:latest ."
+                    
+                    // Login and Push to Docker Hub
+                    withCredentials([usernamePassword(credentialsId: 'dockerhub-login', passwordVariable: 'PASS', usernameVariable: 'USER')]) {
+                        sh "echo $PASS | docker login -u $USER --password-stdin"
+                        sh "docker push ${DOCKER_USER}/${APP_NAME}:latest"
+                    }
+                }
             }
         }
     }
